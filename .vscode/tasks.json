@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "haxe",
+			"args": "active configuration",
+			"group": "build"
+		},
+		{
+			"type": "shell",
+			"label":"Run haxe",
+			"command":"neko",	
+			"args": ["bin/run.n", "-debug"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn":"haxe: active configuration"
+		},
+		{
+			"type": "shell",
+			"label": "Compile haxe",
+			"command": "nekotools",
+			"args": [
+				"boot",
+				"-c",
+				"run.n",
+				"-debug"
+			],
+			"options":{"cwd":"bin/"},
+			"group": "build",
+			"problemMatcher":[]
+		}
+	]
+}
