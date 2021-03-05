@@ -2,24 +2,20 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "haxe",
-			"args": "active configuration",
-			"group": "build"
+			"type": "shell",
+			"label": "run haxe",
+			"command": "haxelib",
+			"args": [
+				"run",
+				"haxe"
+			],
+			"group": "build",
+			"dependsOn": "haxe: build.hxml",
+			"problemMatcher": []
 		},
 		{
 			"type": "shell",
-			"label":"Run haxe",
-			"command":"neko",	
-			"args": ["bin/run.n", "-debug"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"dependsOn":"haxe: active configuration"
-		},
-		{
-			"type": "shell",
-			"label": "Compile haxe",
+			"label": "compile haxe",
 			"command": "nekotools",
 			"args": [
 				"boot",
@@ -27,9 +23,23 @@
 				"run.n",
 				"-debug"
 			],
-			"options":{"cwd":"bin/"},
 			"group": "build",
-			"problemMatcher":[]
+			"problemMatcher": []
+		},
+		{
+			"type": "hxml",
+			"file": "build.hxml",
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "haxe: build.hxml"
 		}
 	]
 }
