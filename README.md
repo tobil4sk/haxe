@@ -1,36 +1,33 @@
-# haxe #
+# haxe
 
 An implementation of the haxe executable specified [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend)
 
-The main idea is that it acts like haxeshim, and still works with older versions of the compiler and haxelib.
+The main idea is that it acts similarly to [haxeshim](https://github.com/lix-pm/haxeshim), and still works with older versions of the compiler and haxelib.
 
-## Build ##
+This repository is not yet functional.
 
-To build the neko bytecode file, run build.hxml using the haxe compiler.
+## Build
 
-To build the executable, run
+To build the neko bytecode file, run `build.hxml` using the haxe compiler.
 
-```nekotools boot -c run.n```
+An executable can be built with CMake, using the CMakeLists.txt file. (See [cmake website](https://cmake.org/) for more details)
 
-and then compile the generated c file.
+## Setup
 
-## Setup ##
+- Once you have built the executable in `bin/`, run the `install-haxe.cmd` script if you are on Windows or otherwise the `install-haxe.sh` script
+- You have to run this script everytime you install a new version of the Haxe compiler using the standard haxe installer
+- If you just want to update this executable and you haven't used the installer or otherwise updated your haxe compiler, run the script with an `update` argument, (i.e. `install-haxe update` or `./install-haxe.sh update`)
 
-- Copy the install-haxe.cmd file if you are on Windows or otherwise the install-haxe.sh file into the haxe install directory
-- Then, everytime you update haxe using the standard haxe installer, run this script and copy into this folder the new haxe executable
-- The Windows script also sets up a `HAXEC_PATH` environment variable
+## Usage
 
-## Usage ##
+The haxe executable is used as the new frontend to the haxe compiler (haxec). It assumes the haxe compiler itself has been renamed to haxec ([Setup](#Setup) takes care of this).
 
-The haxe executable is used as the new frontend to the haxe compiler (haxec). It assumes the haxe compiler itself has been renamed to haxec.
-
-It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all -lib flags, and finds the haxec executable to run.
+It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all `-lib` flags, and finds the haxec executable to run.
 
 Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend) for more specific details
 
-## Reverting back to a normal haxe setup ##
+## Reverting back to a normal haxe setup
 
 - Make sure that the haxe and haxec executables are not running
-- Run the uninstall-haxe script in the `setup/` directory
+- Run the uninstall-haxe script in the `bin/` directory
 - You're back to a normal setup!
-- `HAXEC_PATH` environment variable is removed as well in the Windows script
