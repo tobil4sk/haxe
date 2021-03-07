@@ -1,2 +1,3 @@
-# rename the compiler back to haxe (overwriting the new haxe executable)
+echo Renaming compiler back to haxe, overwriting new haxe executable
 mv $HAXEPATH/haxec $HAXEPATH/haxe
+exit 0
