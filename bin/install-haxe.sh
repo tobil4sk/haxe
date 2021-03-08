@@ -1,3 +1,9 @@
+if [ ! -n "$HAXEPATH" ]
+then
+	# use default path if $HAXEPATH isn't defined
+	HAXEPATH="/usr/bin"
+fi
+
 if [ "$1" = update ]
 then
 	echo Updating haxe executable in $HAXEPATH
@@ -7,5 +13,6 @@ else
 	mv $HAXEPATH/haxe $HAXEPATH/haxec
 	echo Copying new haxe executable into $HAXEPATH
 fi
-cp ./haxe $HAXEPATH/
+
+cp ./haxe $HAXEPATH
 exit 0

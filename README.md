@@ -14,6 +14,7 @@ An executable can be built with CMake, using the CMakeLists.txt file. (See [cmak
 
 ## Setup
 
+- If you are on linux and your haxe compiler is not located in `/usr/bin/`, set an environment variable `HAXEPATH` to the path where the executable is found
 - Once you have built the executable in `bin/`, run the `install-haxe.cmd` script if you are on Windows or otherwise the `install-haxe.sh` script
 - You have to run this script everytime you install a new version of the Haxe compiler using the standard haxe installer
 - If you just want to update this executable and you haven't used the installer or otherwise updated your haxe compiler, run the script with an `update` argument, (i.e. `install-haxe update` or `./install-haxe.sh update`)
@@ -29,5 +30,6 @@ Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#
 ## Reverting back to a normal haxe setup
 
 - Make sure that the haxe and haxec executables are not running
-- Run the uninstall-haxe script in the `bin/` directory
+- If you are on linux and your haxe executable is not located in `/usr/bin/`, set an environment variable `HAXEPATH` to the path where the executable is found
+- Run the uninstall-haxe script found in the `bin/` directory
 - You're back to a normal setup!
