@@ -1,4 +1,4 @@
 -cp src
 -D analyzer-optimize
--neko run.n
+--neko run.n
 --main Main

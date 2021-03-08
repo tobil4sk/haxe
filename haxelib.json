@@ -9,6 +9,7 @@
 	"version": "0.0.0",
 	"classPath": "src/",
 	"releasenote": "",
+	"main":"Main",
 	"contributors": [
 		"tobil4sk"
 	]
