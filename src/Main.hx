@@ -57,7 +57,7 @@ class Main {
 		var haxecPath = "";
 
 		// make calls
-		for (call in processes){
+		for (build in builds){
 			//Sys.command(haxecPath, call.args);
 		}
 	}
