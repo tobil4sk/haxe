@@ -7,7 +7,7 @@ class Main {
 
 	final args:Array<String>;
 
-	final haxeEnv:HaxeEnv;
+	final packageManager:PackageManager;
 
 	/** Array of haxec calls that will be run at the end **/
 	final processes:Array<Process>;
@@ -16,14 +16,10 @@ class Main {
 		this.dir = new Path(dir);
 		this.args = args;
 
-		haxeEnv = new HaxeEnv();
+		packageManager = new PackageManager();
 
-		// get the haxelib library path to set the 'haxelib' environment variable
-		var haxelibPath = Sys.getEnv("HAXELIB_LIBRARY_PATH");
-		if (haxelibPath == null)
-			// get the haxelib library path from haxelib
-			haxelibPath = new sys.io.Process("haxelib", ["config"]).stdout.readLine();
-		
+		lockData = [];
+
 		Sys.putEnv("haxelib", haxelibPath);
 
 		processes = [];
