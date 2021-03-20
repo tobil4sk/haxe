@@ -1,4 +1,4 @@
 -cp src
 -D analyzer-optimize
---neko run.n
+--hl bin/hlc/main.c
 --main Main

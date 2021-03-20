@@ -19,37 +19,37 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
 	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIR} )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
-# find Haxe and Neko
+# find Haxe and Hashlink directories
 
 find_program(HAXE_COMPILER haxe)
 
-find_path(NEKO_INCLUDE_DIRS neko.h)
-find_library(NEKO_LIBRARIES neko)
-find_program(NEKO neko)
-find_program(NEKOTOOLS nekotools)
+find_path(HASHLINK_INCLUDE_DIR
+	hlc.h
+	HINTS $ENV{HASHLINK}/src
+)
+find_path(HASHLINK_LIBRARY_DIR
+	hl.lib
+	HINTS $ENV{HASHLINK}
+)
+# find_library(HASHLINK_LIBRARIES hl)
+set(HASHLINK_LIBRARIES hl libhl CACHE STRING "Libraries to include in compilation")
 
 message(STATUS "HAXE_COMPILER: ${HAXE_COMPILER}")
-message(STATUS "NEKO_INCLUDE_DIRS: ${NEKO_INCLUDE_DIRS}")
-message(STATUS "NEKO_LIBRARIES: ${NEKO_LIBRARIES}")
-message(STATUS "NEKOTOOLS: ${NEKOTOOLS}")
+message(STATUS "HASHLINK_INCLUDE_DIR: ${HASHLINK_INCLUDE_DIR}")
+message(STATUS "HASHLINK_LIBRARY_DIR: ${HASHLINK_LIBRARY_DIR}")
+message(STATUS "HASHLINK_LIBRARIES: ${HASHLINK_LIBRARIES}")
 
-include_directories(${NEKO_INCLUDE_DIRS})
+include_directories(${HASHLINK_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/bin/hlc/)
+link_directories(${HASHLINK_LIBRARY_DIR})
 
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/run.n
+add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
     COMMAND ${HAXE_COMPILER} build.hxml
     VERBATIM
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/run.c
-    COMMAND ${NEKOTOOLS} boot -c run.n
-    VERBATIM
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS ${CMAKE_SOURCE_DIR}/run.n
-)
-
 add_executable(haxe
-    ${CMAKE_SOURCE_DIR}/run.c
+    ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
 )
 
-target_link_libraries(haxe ${NEKO_LIBRARIES})
+target_link_libraries(haxe ${HASHLINK_LIBRARIES})
