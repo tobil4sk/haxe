@@ -14,19 +14,6 @@
 			"problemMatcher": []
 		},
 		{
-			"type": "shell",
-			"label": "compile haxe",
-			"command": "nekotools",
-			"args": [
-				"boot",
-				"-c",
-				"run.n",
-				"-debug"
-			],
-			"group": "build",
-			"problemMatcher": []
-		},
-		{
 			"type": "hxml",
 			"file": "build.hxml",
 			"problemMatcher": [
