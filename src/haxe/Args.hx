@@ -61,7 +61,7 @@ class Args {
 				case PairArg(arg):
 					if(args.length == 1)
 						//error
-						throw new Error.IncompleteOptionError(arg);
+						throw new Error.IncompleteOptionError(current);
 					pairArgs[arg] = args.splice(0, 2).pop();
 				case Hxml(file):
 				// incomplete
@@ -112,13 +112,13 @@ class Args {
 	}
 
 	/**
-	If the argument has a "-" or "--" in front of it, return it without it, otherwise return an empty string
+	If the argument has "--" in front of it, return it without it, otherwise return an empty string
 	**/
 	static function stripDashes(arg:String):String {
 		var match = ~/--[^-].+/;
 		if(match.match(arg))
 			return arg.substring(2);
-		return stripDash(arg);
+		return "";
 	}
 
 	/** If an argument exists in a map, return its main alias, otherwise return null **/
@@ -129,18 +129,12 @@ class Args {
 			return arg;
 		// if it is in their aliases
 
-		// the first alias requires a single dash
-		var first = true;
-		for(main => aliases in map) {
-			if (first){
-				first = false;
-				if(aliases.contains(stripDash(rawArg)))
-					return main;
-				continue;
-			}
-			if (aliases.contains(arg))
+		// aliases require a single dash
+		var stripSingle = stripDash(rawArg);
+		for(main => aliases in map)
+			if(aliases.contains(stripSingle))
 				return main;
-		}
+
 		return null;
 	}
 
