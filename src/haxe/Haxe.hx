@@ -8,10 +8,10 @@ class Haxe {
 	static final LOCK_FILE = "haxelib-lock.json";
 	static final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 
-	final packageManager:PackageManager;
+	//final packageManager:PackageManager;
 
 	function new(){
-		packageManager = new PackageManager();
+		//packageManager = new PackageManager();
 
 	}
 
