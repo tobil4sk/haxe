@@ -1,3 +1,4 @@
+package haxe;
 
 private enum ArgType {
 	SingleArg(arg:String);

@@ -1,3 +1,6 @@
+package haxe;
+
+
 /**
 	Class that keeps track of the package manager executable, and can run commands on them
 

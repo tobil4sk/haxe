@@ -1,3 +1,6 @@
+package haxe;
+
+
 import haxe.ds.Either;
 
 typedef Lib = {

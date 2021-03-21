@@ -1,3 +1,6 @@
+package haxe;
+
+
 import haxe.Exception;
 
 class Error extends Exception {

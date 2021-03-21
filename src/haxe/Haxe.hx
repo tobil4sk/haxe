@@ -1,7 +1,10 @@
+package haxe;
+
+
 import sys.FileSystem;
 import haxe.io.Path;
 
-class Main {
+class Haxe {
 	static final LOCK_FILE = "haxelib-lock.json";
 	static final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 
@@ -133,6 +136,6 @@ class Main {
 			Sys.setCwd(dir);
 		}
 
-		new Main().run(dir, args);
+		new Haxe().run(dir, args);
 	}
 }

@@ -1,3 +1,6 @@
+package haxe;
+
+
 private typedef Library = {
 	var name:String;
 	var version:String;

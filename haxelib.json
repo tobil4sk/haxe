@@ -9,7 +9,7 @@
 	"version": "0.0.0",
 	"classPath": "src/",
 	"releasenote": "",
-	"main":"Main",
+	"main":"haxe.Haxe",
 	"contributors": [
 		"tobil4sk"
 	]
