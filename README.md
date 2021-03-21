@@ -23,7 +23,7 @@ On Windows, you can uncomment `-D hlgen.makefile=vs2019` in the `build.hxml`, an
 
 The haxe executable is used as the new frontend to the haxe compiler (haxec). It assumes the haxe compiler itself has been renamed to haxec ([Setup](#Setup) takes care of this).
 
-It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all `--lib` flags, and finds the haxec executable to run.
+It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all `-lib` flags, and finds the haxec executable to run.
 
 Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend) for more specific details
 
