@@ -8,9 +8,9 @@ This repository is not yet functional.
 
 ## Build
 
-To build the neko bytecode file, run `build.hxml` using the haxe compiler.
-
 An executable can be built with CMake, using the CMakeLists.txt file. (See [cmake website](https://cmake.org/) for more details)
+
+On Windows, you can uncomment `-D hlgen.makefile=vs2019` in the `build.hxml`, and run `haxe build.hxml` to generate Visual Studio solution files which can then be built using Visual Studio.
 
 ## Setup
 
@@ -23,7 +23,7 @@ An executable can be built with CMake, using the CMakeLists.txt file. (See [cmak
 
 The haxe executable is used as the new frontend to the haxe compiler (haxec). It assumes the haxe compiler itself has been renamed to haxec ([Setup](#Setup) takes care of this).
 
-It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all `-lib` flags, and finds the haxec executable to run.
+It is used to run compilation commands, and before passing them onto the compiler it reads lock files, resolves all `--lib` flags, and finds the haxec executable to run.
 
 Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend) for more specific details
 

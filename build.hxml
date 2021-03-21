@@ -1,4 +1,5 @@
 -cp src
 -D analyzer-optimize
 --hl bin/hlc/main.c
---main Main
+--main haxe.Haxe
+#-D hlgen.makefile=vs2019
