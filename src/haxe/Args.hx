@@ -23,7 +23,8 @@ class Args {
 	static final PAIR_ARGS = [
 		"cwd"=>["C"],
 		"lock-file"=>[],
-		"library" => ["L", "lib"]
+		"library" => ["L", "lib"],
+		"lib-setup"=>[]
 	];
 
 	/** single haxe arguments **/
@@ -59,10 +60,15 @@ class Args {
 					args.splice(0, 1);
 					singleArgs.push(arg);
 				case PairArg(arg):
-					if(args.length == 1)
-						//error
-						throw new Error.IncompleteOptionError(current);
-					pairArgs[arg] = args.splice(0, 2).pop();
+					trace(args.length, arg);
+					if(args.length == 1) {
+						// error unless it is lib-setup
+						if (arg != "lib-setup")
+							throw new Error.IncompleteOptionError(current);
+						args.shift();
+						pairArgs[arg] = "";
+					} else
+						pairArgs[arg] = args.splice(0, 2).pop();
 				case Hxml(file):
 				// incomplete
 				case Rest(arg):

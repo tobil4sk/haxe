@@ -79,7 +79,7 @@ class Resolver {
 			this.useGlobals = false;
 		}
 
-		haxelibPath = new Path("");
+		haxelibPath = new Path(Haxelib.getRepository());
 
 		for (i => j in lockData) {
 			trace(i, j);
@@ -145,7 +145,7 @@ class Resolver {
 		throws an error, otherwise resolve it using `.current` files. **/
 	public function libPath(lib:String, ?version:Null<String>):Path{
 		final checkVersion = version != null;
-		var localLibData:Null<Lib>;
+		var localLibData:Null<Lib> = null;
 		var libData:Null<Lib>;
 
 		// if scoped, throw errors if lib not found in scope,

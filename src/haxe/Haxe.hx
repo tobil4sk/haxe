@@ -20,11 +20,22 @@ class Haxe {
 		trace(args);
 		try {
 			final expandedArgs = new Args(args);
-			build(dir, expandedArgs);
+
+			final setup = expandedArgs.getArgPair("lib-setup");
+			if(setup != null){
+				libSetup(setup);
+			} else {
+				build(dir, expandedArgs);
+			}
 		} catch (e:Error) {
 			Error.log(e);
 		}
 
+	}
+
+	/** Run lib setup, part of haxelib **/
+	function libSetup(path:String){
+		Haxelib.setup(path);
 	}
 
 	/**
