@@ -7,7 +7,7 @@
 			"command": "haxelib",
 			"args": [
 				"run",
-				"haxe"
+				"haxe-new"
 			],
 			"group": "build",
 			"dependsOn": "haxe: build.hxml",
