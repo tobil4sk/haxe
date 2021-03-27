@@ -42,7 +42,12 @@ message(STATUS "HASHLINK_LIBRARIES: ${HASHLINK_LIBRARIES}")
 include_directories(${HASHLINK_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/bin/hlc/)
 link_directories(${HASHLINK_LIBRARY_DIR})
 
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
+add_custom_command(
+	OUTPUT ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
+	DEPENDS build_source
+)
+
+add_custom_target(build_source
     COMMAND ${HAXE_COMPILER} build.hxml
     VERBATIM
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
