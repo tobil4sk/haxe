@@ -27,6 +27,11 @@ It is used to run compilation commands, and before passing them onto the compile
 
 Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend) for more specific details
 
+### Additional functionality
+
+Running `haxe --lib-setup` can be used to configure the global repository path.
+This was added because in order to remove the dependency on haxelib, the haxe executable itself should be able to set this path and manage it.
+
 ## Reverting back to a normal haxe setup
 
 - Make sure that the haxe and haxec executables are not running
