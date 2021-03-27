@@ -20,6 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+package haxe;
+
 
 import sys.FileSystem;
 import haxe.io.Path;
