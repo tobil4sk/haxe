@@ -7,6 +7,28 @@ class Error extends Exception {
 
 }
 
+class LibraryMissing extends Exception {
+	public function new(lib:String, scoped=true) {
+		var errorString = 'Library ${lib} not installed in current scope : run \'haxelib install ${lib}\'';
+
+		if(!scoped)
+			errorString = 'Library ${lib} not installed : run \'haxelib install ${lib}\'';
+
+		super(errorString);
+	}
+}
+
+class LibraryVersionMissing extends Exception {
+	public function new(lib:String, version:String, scoped = true) {
+		var errorString = 'Library ${lib} version ${version} not installed in current scope';
+
+		if (!scoped)
+			errorString = 'Library ${lib} version ${version} not installed';
+
+		super(errorString);
+	}
+}
+
 class ArgsError extends Error {
 
 

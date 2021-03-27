@@ -1,12 +1,9 @@
 package haxe;
 
-
 /**
-	Class that keeps track of the package manager executable, and can run commands on them
-
-	Hopefully should eventually support custom package manager integration.
+	Class
 **/
-class PackageManager {
+class PackageResolver {
 	// paths to commands
 	// haxe compiler path
 	//var haxeCompiler:String;

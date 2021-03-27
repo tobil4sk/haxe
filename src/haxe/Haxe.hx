@@ -1,12 +1,8 @@
 package haxe;
 
-
-import sys.FileSystem;
 import haxe.io.Path;
 
 class Haxe {
-	static final LOCK_FILE = "haxelib-lock.json";
-	static final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 
 	//final packageManager:PackageManager;
 
@@ -45,11 +41,8 @@ class Haxe {
 		}
 
 		final overridePath = args.getArgPair("lock-file");
-		final lockData = loadLockFiles(dir, overridePath);
+		final resolver = new Resolver(dir, overridePath);
 
-		for (i => j in lockData) {
-			trace(i, j);
-		}
 
 		// process arguments
 
@@ -69,61 +62,8 @@ class Haxe {
 		}
 	}
 
-	/**
-	Return LockFormat Map containing library information. Look for `haxelib-lock.json` in `dir`, then
-	get `overridePath` if specified
-	**/
-	function loadLockFiles(dir:String, ?overridePath:Null<String>):LockFormat{
-		// open lock files
-		trace(overridePath);
-		var lockData:LockFormat = [];
 
-		/** Parses a lockfile and if new values are set then overrides old ones */
-		function loadLockFile(path:String, optional = true) {
-			if (FileSystem.exists(path)) {
-				var content = haxe.Json.parse(sys.io.File.getContent(path));
-				var lock = LockFormat.load(content);
-				for (lib in lock.keys())
-					lockData[lib] = lock[lib];
-			}
 
-			if (!optional)
-				throw new Error.FileError(path);
-		}
-
-		// local one
-		loadLockFile(LOCK_FILE);
-
-		// lock file given as argument, it is not optional so throw error if it is not found
-		if(overridePath != null) {
-			loadLockFile(overridePath, false);
-		}
-
-		// global lock file
-		var globalLockPath = locateGlobalLockFile();
-		var globalFile = Path.join([globalLockPath, GLOBAL_LOCK_FILE]);
-
-		//trace(globalFile);
-
-		loadLockFile(globalFile);
-
-		return lockData;
-	}
-
-	/**
-	Returns the path to the global lockfile
-	**/
-	public static function locateGlobalLockFile():String{
-		var globalLockPath = Sys.getEnv("HAXELIB_OVERRIDE_PATH");
-		if (globalLockPath == null) {
-			var home = Sys.getEnv("HOME");
-			if (home == null)
-				// Windows
-				home = Sys.getEnv("USERPROFILE");
-			globalLockPath = home;
-		}
-		return globalLockPath;
-	}
 
 	/** entry point **/
 	static function main():Void {
