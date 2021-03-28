@@ -21,7 +21,7 @@ class Haxe {
 		try {
 			final expandedArgs = new Args(args);
 
-			final setup = expandedArgs.getArgPair("lib-setup");
+			final setup = expandedArgs.getSpecialArg("lib-setup");
 			if(setup != null){
 				libSetup(setup);
 			} else {
@@ -45,13 +45,13 @@ class Haxe {
 	function build(dir:String, args:Args):Void {
 
 		// check for --cwd first
-		final newDir = args.getArgPair("cwd");
+		final newDir = args.getSpecialArg("cwd");
 
 		if (newDir != null){
 			Sys.setCwd(newDir);
 		}
 
-		final overridePath = args.getArgPair("lock-file");
+		final overridePath = args.getSpecialArg("lock-file");
 		final resolver = new Resolver(dir, overridePath);
 
 
