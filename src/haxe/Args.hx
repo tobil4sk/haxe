@@ -1,9 +1,5 @@
 package haxe;
 
-import haxe.io.Path;
-import sys.io.File;
-import sys.FileSystem;
-
 private enum ArgType {
 	SingleArg(arg:String);
 	PairArg(arg:String);
@@ -12,7 +8,7 @@ private enum ArgType {
 }
 
 /**
-	An abstract type over an array of strings, that allows getting individual
+	A class that parses hxmls and works out if an argument is single or comes in a pair.
 **/
 class Args {
 	/** All possible single arguments with their aliases **/
@@ -74,106 +70,18 @@ class Args {
 					} else
 						pairArgs[arg] = args.splice(0, 2).pop();
 				case Hxml(file):
-					final out = fromHxml(file);
+					final out = HXML.fromHXML(file);
 					args.shift();
 
 					// add all the extracted arguments to the list
 					while(out.length > 0)
 						args.unshift(out.pop());
 
-				// incomplete
 				case Rest(arg):
 					args.splice(0, 1);
 					rest.push(arg);
 			}
 		}
-	}
-
-	/** Load arguments from an hxml. Mostly ported from compiler. **/
-	function fromHxml(path:String):Array<String>{
-		if(!FileSystem.exists(path))
-			throw new Error.FileError(path);
-
-		final content = File.getContent(path);
-
-		final lines = splitLines(content);
-
-		// for some reason the compiler does this
-		final unquote = function(str:String):String {
-			final len = str.length;
-			if (len > 0){
-				return
-					switch([str.charAt(0), str.charAt(len-1)]){
-					case ['"', '"'] | ["'", "'"]:
-						str.substring(1, len -1);
-					case _:
-						str;
-					}
-			}
-			return str;
-		}
-
-		// replaces List.concat in ocaml
-		final flatten = function(array:Array<Array<String>>):Array<String>{
-			final newArray = [];
-
-			for (subArray in array)
-				for(item in subArray)
-					newArray.push(item);
-
-			return newArray;
-		}
-
-		// function used to map lines
-		final split = function(str:String):Array<String>{
-			// trim and remove quotes
-			str = unquote(StringTools.trim(str));
-			// remove empty lines and comments
-			if (str == "" || str.charAt(0) == "#")
-				return [];
-			// if it is a flag
-			else if (str.charAt(0) == "-") {
-				// split by spaces
-				final split = str.split(" ");
-				// if the flag has extra information following it
-				if (split.length > 1) {
-					final flag = split[0];
-					final extra = split.slice(1, split.length).join(" ");
-					return [unquote(flag), unquote(StringTools.trim(extra))];
-				}
-			}
-
-			return [str];
-		}
-
-		final newlines = flatten(lines.map(split));
-
-		return newlines;
-	}
-
-	static function splitLines(content:String):Array<String>{
-		final lines = [];
-
-
-		final match = ~/[\r\n]+/;
-		final matches = ["\r", "\n"];
-
-		var index = 0;
-		var line:StringBuf;
-		var space:String;
-		while (index < content.length) {
-			line = new StringBuf();
-			// get line content until newline reached
-			while(!matches.contains(content.charAt(index))){
-				line.add(content.charAt(index++));
-			}
-			// wait for white spaces to end
-			while(matches.contains(content.charAt(index))){
-				index++;
-			}
-			lines.push(line.toString());
-		}
-		return lines;
 	}
 
 	/**
