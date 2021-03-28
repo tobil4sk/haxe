@@ -97,11 +97,13 @@ class Resolver {
 		/** Parses a lockfile and if new values are set then overrides old ones */
 		function loadLockFile(path:String, optional = true) {
 			if (FileSystem.exists(path)) {
-				final content = haxe.Json.parse(sys.io.File.getContent(path));
-				final lock = load(content);
-				for (lib in lock.keys())
-					lockData[lib] = lock[lib];
-				return;
+				try {
+					final content = haxe.Json.parse(sys.io.File.getContent(path));
+					final lock = load(content);
+					for (lib in lock.keys())
+						lockData[lib] = lock[lib];
+					return;
+				} catch(e:Exception){}
 			}
 
 			if (!optional)
