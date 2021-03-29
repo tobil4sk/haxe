@@ -69,9 +69,9 @@ class Haxelib {
 	static function getGlobalRepository():String {
 		var rep = getGlobalRepositoryPath(true);
 		if (!FileSystem.exists(rep))
-			throw "haxelib Repository " + rep + " does not exist. Please run `haxe --lib-setup` again.";
+			throw "haxelib Repository " + rep + " does not exist. Please run `haxe lib-setup` again.";
 		else if (!FileSystem.isDirectory(rep))
-			throw "haxelib Repository " + rep + " exists, but is a file, not a directory. Please remove it and run `haxe --lib-setup` again.";
+			throw "haxelib Repository " + rep + " exists, but is a file, not a directory. Please remove it and run `haxe lib-setup` again.";
 		return Path.addTrailingSlash(rep);
 	}
 
@@ -90,7 +90,7 @@ class Haxelib {
 			// on unixes, try to read system-wide config
 			rep = try File.getContent("/etc/.haxelib").trim() catch (_:Dynamic) null;
 			if (rep == null)
-				throw "Package manager not set up. Please run `haxe --lib-setup`";
+				throw "Package manager not set up. Please run `haxe lib-setup`";
 		} else {
 			// on windows, try to use haxe installation path
 			rep = getWindowsDefaultGlobalRepositoryPath();

@@ -1,6 +1,6 @@
 # haxe
 
-An implementation of the haxe executable specified [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend)
+An implementation of the haxe executable specified [here.](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#haxe-the-frontend)
 
 The main idea is that it acts similarly to [haxeshim](https://github.com/lix-pm/haxeshim), and still works with older versions of the compiler and haxelib.
 
@@ -29,7 +29,7 @@ Read [here](https://github.com/HaxeFoundation/haxe/wiki/Haxe-haxec-haxelib-plan#
 
 ### Additional functionality
 
-Running `haxe --lib-setup` can be used to configure the global repository path.
+Running `haxe lib-setup` can be used to configure the global repository path.
 This was added because in order to remove the dependency on haxelib, the haxe executable itself should be able to set this path and manage it.
 
 ## Reverting back to a normal haxe setup

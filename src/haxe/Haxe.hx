@@ -1,58 +1,56 @@
 package haxe;
-
 import haxe.io.Path;
 
 class Haxe {
 
-	//final packageManager:PackageManager;
+	/** Default directory from which build commands are run (overriden for individual builds by --cwd) **/
+	public var dir(default, set):String;
 
-	function new(){
-		//packageManager = new PackageManager();
-
+	function set_dir(dir:String) {
+		if(!sys.FileSystem.exists(dir))
+			throw 'Path \'${dir}\' does not exist';
+		return this.dir = dir;
 	}
 
-	/**
-	Run a haxe command. Work out if building, or doing something else (e.g. --version or --help)
-	beginning in `dir` with `args` as arguments with which to run it
-	**/
-	public function run(dir:String, args:Array<String>):Void {
-		// expand all .hxml files
-		trace(args);
-		try {
-			final expandedArgs = new Args(args);
+	/** Initialize the haxe frontend in a specific directory **/
+	function new(dir:String){
+		this.dir = dir;
+	}
 
-			final setup = expandedArgs.getSpecialArg("lib-setup");
-			if(setup != null){
-				libSetup(setup);
-			} else {
-				build(dir, expandedArgs);
-			}
-		} catch (e:Error) {
-			Error.log(e);
+	/** Run lib-setup, part of haxelib **/
+	public function libSetup(args:Array<String>){
+		trace(args, args.length);
+
+		final path = switch (args.length){
+		case 0: "";
+		case 1: args[0];
+		case _: throw new Error.ArgsError('lib-setup expects a maximum of one argument');
 		}
 
-	}
+		trace(path);
 
-	/** Run lib setup, part of haxelib **/
-	function libSetup(path:String){
 		Haxelib.setup(path);
 	}
 
 	/**
-	Run a haxe building command beginning in `dir` (overriden by `--cwd` flag) with `args` as
-	arguments with which to run it. `args` can no longer contain .hxmls or commands that are not for building
+		Run a haxe building command with `args` as arguments with which to run it.
 	**/
-	function build(dir:String, args:Args):Void {
+	public function build(argsArray:Array<String>):Void {
+		final args = new Args(argsArray);
 
 		// check for --cwd first
-		final newDir = args.getSpecialArg("cwd");
+		final buildDir = switch(args.getSpecialArg("cwd")){
+			case null: dir;
+			case path: path;
+		};
 
-		if (newDir != null){
-			Sys.setCwd(newDir);
-		}
-
-		final overridePath = args.getSpecialArg("lock-file");
-		final resolver = new Resolver(dir, overridePath);
+		// get the absolute path for the override path, if specified.
+		final overridePath = switch(args.getSpecialArg("lock-file")){
+			case null: null;
+			case path if(!Path.isAbsolute(path)): Path.join([buildDir, path]);
+			case absolutePath: absolutePath;
+		};
+		final resolver = new Resolver(buildDir, overridePath);
 
 
 		// process arguments
@@ -73,12 +71,9 @@ class Haxe {
 		}
 	}
 
-
-
-
-	/** entry point **/
+	/** Entry point **/
 	static function main():Void {
-		var args = Sys.args();
+		final args = Sys.args();
 		var dir = Sys.getCwd();
 
 		//if haxelib call
@@ -87,6 +82,16 @@ class Haxe {
 			Sys.setCwd(dir);
 		}
 
-		new Haxe().run(dir, args);
+		final process = new Haxe(dir);
+
+		try {
+			if (args[0] == "lib-setup") {
+				process.libSetup(args.slice(1));
+			} else {
+				process.build(args);
+			}
+		} catch (e:Error) {
+			Error.log(e);
+		}
 	}
 }

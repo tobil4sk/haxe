@@ -50,8 +50,6 @@ class Resolver {
 	/** Whether global lock file is used in library resolution **/
 	public final useGlobals:Bool;
 
-	/** directory in which to perform resolution **/
-	final dir:String;
 	/** lockData from local files and global one **/
 	final lockData:Null<LockFormat>;
 	/** lockData from local files and global one **/
@@ -59,14 +57,13 @@ class Resolver {
 
 	final haxelibPath:Path;
 
-	/** Create a resolver instance in `dir`, optionally with an override file specified at `overridePath`.
+	/**
+		Create a resolver instance in `dir`, optionally with an override file specified at `overridePath`.
 		if `useGlobals` is set to false, then ignore global override file, if it exists.
 	 **/
 	public function new(dir:String, ?overridePath:Null<String>, useGlobals = true){
-		this.dir = dir;
 
-		lockData = loadLocalLockFiles(overridePath);
-
+		lockData = loadLocalLockFiles(dir, overridePath);
 		// if lockData is empty at this point, the resolution isn't scoped.
 		scoped = lockData == null;
 
@@ -91,7 +88,7 @@ class Resolver {
 		Return LockFormat Map containing library information. Look for `haxelib-lock.json`, then
 		override with `overridePath` if specified. Returns null if neither of these can be found.
 	**/
-	function loadLocalLockFiles(?overridePath:Null<String>):Null<LockFormat> {
+	function loadLocalLockFiles(dir:String, overridePath:Null<String>):Null<LockFormat> {
 		trace(overridePath);
 		final lockData:LockFormat = [];
 		/** Parses a lockfile and if new values are set then overrides old ones */

@@ -29,16 +29,14 @@ class LibraryVersionMissing extends Exception {
 	}
 }
 
-class ArgsError extends Error {
-
-
-}
 
 class FileError extends Error {
 	public function new(path:String){
 		super('file at path \'${path}\' not found');
 	}
 }
+
+class ArgsError extends Error {}
 
 class IncompleteOptionError extends ArgsError {
 
