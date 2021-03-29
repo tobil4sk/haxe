@@ -3,7 +3,7 @@
 	"url": "https://github.com/tobil4sk/haxe/",
 	"license": "MIT",
 	"tags": [
-		"haxe"
+		"haxe", "tool", "cli"
 	],
 	"description": "",
 	"version": "0.0.0",
