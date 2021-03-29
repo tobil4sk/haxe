@@ -116,7 +116,9 @@ class Args {
 
 	/** Evaluates the type of an argument and returns it as an enum **/
 	static function getArgType(arg:String): UnparsedArgType {
-		switch(arg){
+		switch (arg) {
+			case getMainAlias(_, SPECIAL_ARGS) => arg if (arg != null):
+				return USpecialArg(arg);
 			case getMainAlias(_, SINGLE_ARGS) => arg if (arg != null):
 				return USingleArg(arg);
 			case getMainAlias(_, PAIR_ARGS) => arg if (arg != null):
