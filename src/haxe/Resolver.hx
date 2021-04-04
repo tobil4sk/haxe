@@ -50,9 +50,9 @@ class Resolver {
 	/** Whether global lock file is used in library resolution **/
 	public final useGlobals:Bool;
 
-	/** lockData from local files and global one **/
-	final lockData:Null<LockFormat>;
-	/** lockData from local files and global one **/
+	/** lockData from local files **/
+	final localLockData:Null<LockFormat>;
+	/** lockData from global lock file **/
 	final globalLockData:Null<LockFormat>;
 
 	final haxelibPath:Path;
@@ -63,7 +63,7 @@ class Resolver {
 	 **/
 	public function new(dir:String, ?overridePath:Null<String>, useGlobals = true){
 
-		lockData = loadLocalLockFiles(dir, overridePath);
+		localLockData = loadLocalLockFiles(dir, overridePath);
 		// if lockData is empty at this point, the resolution isn't scoped.
 		scoped = lockData == null;
 
@@ -78,7 +78,7 @@ class Resolver {
 
 		haxelibPath = new Path(Haxelib.getRepository());
 
-		for (i => j in lockData) {
+		for (i => j in localLockData) {
 			trace(i, j);
 		}
 	}
@@ -90,7 +90,7 @@ class Resolver {
 	**/
 	function loadLocalLockFiles(dir:String, overridePath:Null<String>):Null<LockFormat> {
 		trace(overridePath);
-		final lockData:LockFormat = [];
+		final localLockData:LockFormat = [];
 		/** Parses a lockfile and if new values are set then overrides old ones */
 		function loadLockFile(path:String, optional = true) {
 			if (FileSystem.exists(path)) {
@@ -98,7 +98,7 @@ class Resolver {
 					final content = haxe.Json.parse(sys.io.File.getContent(path));
 					final lock = load(content);
 					for (lib in lock.keys())
-						lockData[lib] = lock[lib];
+						localLockData[lib] = lock[lib];
 					return;
 				} catch(e:Exception){}
 			}
@@ -114,9 +114,9 @@ class Resolver {
 			loadLockFile(overridePath, false);
 		}
 
-		if(lockData.keys().hasNext())
-			return lockData;
-		return null;
+		if (!localLockData.keys().hasNext())
+			return null;
+		return localLockData;
 	}
 
 	/**
@@ -127,9 +127,9 @@ class Resolver {
 		final globalLockPath = locateGlobalLockFile();
 		final lockData = load(Path.join([globalLockPath, GLOBAL_LOCK_FILE]));
 
-		if(lockData.keys().hasNext())
-			return lockData;
-		return null;
+		if(!lockData.keys().hasNext())
+			return null;
+		return lockData;
 	}
 
 	/** Change environment variables in `path` to their values and return as a Path object **/
