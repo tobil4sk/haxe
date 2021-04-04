@@ -67,7 +67,7 @@ class Resolver {
 
 		localLockData = loadLocalLockFiles(dir, overridePath);
 		// if lockData is empty at this point, the resolution isn't scoped.
-		scoped = lockData == null;
+		scoped = localLockData == null;
 
 		// if meant to use globals, check if the global file exists
 		if(useGlobals){
@@ -80,7 +80,7 @@ class Resolver {
 
 		haxelibPath = getHaxelibPath();
 
-		for (i => j in lockData) {
+		for (i => j in localLockData) {
 			trace(i, j);
 		}
 	}
@@ -158,7 +158,7 @@ class Resolver {
 		// if scoped, throw errors if lib not found in scope,
 		// whether or not dev or global will override
 		if(scoped){
-			localLibData = lockData.get(lib);
+			localLibData = localLockData.get(lib);
 			if(localLibData == null)
 				throw new LibraryMissing(lib);
 			if(checkVersion && (version != localLibData.version))
