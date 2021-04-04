@@ -8,6 +8,8 @@ This repository is not yet functional.
 
 ## Build
 
+Before building, you must run `haxelib install build.hxml --always`, in order to ensure you have all the correct library versions.
+
 An executable can be built with CMake, using the CMakeLists.txt file. (See [cmake website](https://cmake.org/) for more details)
 
 On Windows, you can uncomment `-D hlgen.makefile=vs2019` in the `build.hxml`, and run `haxe build.hxml` to generate Visual Studio solution files which can then be built using Visual Studio.
