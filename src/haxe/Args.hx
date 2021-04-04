@@ -1,5 +1,7 @@
 package haxe;
 
+import haxe.iterators.ArrayIterator;
+
 enum ArgType {
 	SingleArg(arg:String);
 	PairArg(arg:String, value:Null<String>);
@@ -13,6 +15,12 @@ private enum UnparsedArgType {
 	UHxml(file:String);
 	URest(arg:String);
 }
+
+typedef ArgsInfo = {
+	final specialArgs:Map<String, Null<String>>;
+	final mainArgs:ArrayIterator<ArgType>;
+}
+
 /**
 	A class that parses hxmls and works out if an argument is single or comes in a pair.
 **/
@@ -21,8 +29,7 @@ class Args {
 	/** arguments that need to be processed before anything else **/
 	static final SPECIAL_ARGS = [
 		"cwd"=>["C"],
-		"lock-file"=>[],
-		"lib-setup"=>[]
+		"lock-file"=>[]
 	];
 
 	/** All possible single arguments with their aliases **/
@@ -30,7 +37,8 @@ class Args {
 		"version"=>[],
 		"help"=>["h"],
 		"next"=>[],
-		"each"=>[]
+		"each" => [],
+		"help-haxec" => []
 	];
 
 	/** All possible paired arguments with aliases **/
@@ -38,80 +46,55 @@ class Args {
 		"library" => ["L", "lib"]
 	];
 
-	/** priority arguments that need to be retrievable at the beginning **/
-	final specialArgs:Map<String, Null<String>>;
-
-	/** The args that will be looped through **/
-	final argsArray:Array<ArgType>;
-
-	public function new(args:Array<String>) {
-		specialArgs = [];
-		argsArray = [];
-
-		sortArgs(args);
-
-		trace("ARGS SORTED!");
-		trace(argsArray);
-	}
-
 
 	/** Work out what types of arguments are in the array `args` and separate them accordingly. Parse .hxml files and sort their arguments recursively **/
-	function sortArgs(args:Array<String>):Void {
+	public static function parse(args:Array<String>):ArgsInfo {
+		/** priority arguments that need to be retrievable at the beginning **/
+		final specialArgs:Map<String, Null<String>> = [];
+
+		/** The args that will be looped through **/
+		final argsArray = [];
+
 		var current:String;
 		while (args.length > 0) {
 			current = args[0];
 			switch (getArgType(current)) {
+				case USpecialArg(arg):
+					specialArgs[arg] = args.splice(0, 2).pop();
 
-			case USpecialArg(arg):
-				specialArgs[arg] = args.splice(0, 2).pop();
+				case USingleArg(arg):
+					args.splice(0, 1);
+					argsArray.push(SingleArg(arg));
 
-			case USingleArg(arg):
-				args.splice(0, 1);
-				argsArray.push(SingleArg(arg));
+				case UPairArg(arg):
+					trace(args.length, arg);
+					if (args.length == 1) {
+						args.shift();
+						argsArray.push(PairArg(arg, ""));
+					} else
+						argsArray.push(PairArg(arg, args.splice(0, 2).pop()));
 
-			case UPairArg(arg):
-				trace(args.length, arg);
-				if(args.length == 1) {
-					// error unless it is lib-setup
-					if (arg != "lib-setup")
-						throw new Error.IncompleteOptionError(current);
+				case URest(arg):
+					args.splice(0, 1);
+
+					argsArray.push(Rest(arg));
+
+				case UHxml(file):
+					final out = HXML.fromHXML(file);
 					args.shift();
-					argsArray.push(PairArg(arg, ""));
-				} else
-					argsArray.push(PairArg(arg, args.splice(0, 2).pop()));
 
-			case URest(arg):
-				args.splice(0, 1);
-
-				argsArray.push(Rest(arg));
-
-			case UHxml(file):
-				final out = HXML.fromHXML(file);
-				args.shift();
-
-				// add all the extracted arguments to the list
-				while(out.length > 0)
-					args.unshift(out.pop());
-
+					// add all the extracted arguments to the list
+					while (out.length > 0)
+						args.unshift(out.pop());
 			}
 		}
-	}
 
-	public function next(){
-		return argsArray.shift();
-	}
-
-	public function hasNext(){
-		return argsArray.length > 0;
-	}
-
-	/** If a special arg exists, return its value. Else return null **/
-	public function getSpecialArg(arg:String): Null<String>{
-		return specialArgs.get(arg);
-	}
-	/** Return true if a special arg is present, otherwise false **/
-	public function specialArgExists(arg:String):Bool{
-		return specialArgs.exists(arg);
+		trace("ARGS SORTED!");
+		trace(argsArray);
+		return {
+			specialArgs: specialArgs,
+			mainArgs: argsArray.iterator()
+		};
 	}
 
 	/** Evaluates the type of an argument and returns it as an enum **/

@@ -1,10 +1,23 @@
 package haxe;
+import sys.io.Process;
 import sys.FileSystem;
 
 import haxe.io.Path;
 
+import haxe.Error.BuildError;
+import haxe.Args;
+import haxe.Args.ArgType;
+
+import haxe.BuildCall;
 
 import haxelib.client.Main as Haxelib;
+
+typedef BuildInfo = {
+	buildDir:String,
+	haxecPath:String,
+	builds:Array<BuildCall>
+}
+
 class Haxe {
 
 	/** Default directory from which build commands are run (overriden for individual builds by --cwd) **/
@@ -67,39 +80,110 @@ class Haxe {
 		Run a haxe building command with `argsArray` as array of arguments with which to run it.
 	**/
 	public function build(argsArray:Array<String>):Void {
-		final args = new Args(argsArray);
-
-		// check for --cwd first
-		final buildDir = switch(args.getSpecialArg("cwd")){
-			case null: dir;
-			case path: path;
-		};
-
-		// get the absolute path for the override path, if specified.
-		final overridePath = switch(args.getSpecialArg("lock-file")){
-			case null: null;
-			case path if(!Path.isAbsolute(path)): Path.join([buildDir, path]);
-			case absolutePath: absolutePath;
-		};
-		final resolver = new Resolver(buildDir, overridePath);
-
+		final args = Args.parse(argsArray);
 
 		// process arguments
+		final buildInfo = generateBuildInfo(args);
 
-		// resolve all -lib flags
-
-		// separate calls if needed
-
-		// Array of haxec calls that will be run at the end
-		final builds:Array<Build> = [];
-
-		// resolve haxec executable
-		var haxecPath = "";
+		// temporary solution, would be better to avoid Sys.setCwd()
+		Sys.setCwd(buildInfo.buildDir);
 
 		// make calls
-		for (build in builds) {
-			// Sys.command(haxecPath, call.args);
+		for (build in buildInfo.builds) {
+			Sys.command(buildInfo.haxecPath, build.args);
 		}
+
+		// back to default directory
+		Sys.setCwd(dir);
+	}
+
+	function generateBuildInfo(args:ArgsInfo):BuildInfo {
+		// work out build directory
+		final buildDir = getBuildDirectory(args.specialArgs.get("cwd"));
+
+		// get the absolute path for the override path, if specified.
+		final overridePath = getLockFilePath(args.specialArgs.get("lock-file"), buildDir);
+
+		// start library resolver
+		final resolver = new Resolver(buildDir, overridePath);
+
+		var haxecPath = "";
+
+		final individualCalls = generateBuildCalls(args.mainArgs, resolver);
+
+		return {
+			buildDir : buildDir,
+			builds : individualCalls,
+			haxecPath : haxecPath
+		};
+	}
+
+	function getBuildDirectory(cwdArg:Null<String>):String {
+		if (cwdArg == null)
+			return dir;
+
+		if (Path.isAbsolute(cwdArg))
+			return cwdArg;
+
+		return Path.join([dir, cwdArg]);
+	}
+
+	function getLockFilePath(overridePath:Null<String>, buildDir:String):String {
+		if (overridePath == null || Path.isAbsolute(overridePath))
+			return overridePath;
+
+		return Path.join([buildDir, overridePath]);
+	}
+
+
+	function generateBuildCalls(args:haxe.iterators.ArrayIterator<ArgType>, resolver:Resolver){
+		// separate arrays of arguments for individual calls, if --each and --next are used
+		final individualCalls:Array<BuildCall> = [];
+
+		// arguments for every call
+		var eachCall:BuildCall = BuildCall.createEmpty();
+		// current call, a "buffer" whose contents can be moved to each or individual calls
+		var currentCall:BuildCall = BuildCall.createEmpty();
+
+		function next() {
+			final newCall = BuildCall.combine(eachCall, currentCall);
+			individualCalls.push(newCall);
+			currentCall.reset();
+		}
+
+		final map = [
+			SingleArg("each") => function(){
+				eachCall = currentCall.copy();
+				currentCall.reset();
+			},
+			SingleArg("next") => next,
+			SingleArg("help") => function(){
+				currentCall.help = true;
+			},
+			SingleArg("version") => function() {
+				currentCall.version = true;
+			}
+		];
+
+		for (arg in args) {
+			switch (arg) {
+				case arg if (map.exists(arg)):
+					map[arg]();
+				case PairArg("library", name):
+					final libPath = resolver.libPath(name);
+
+
+				// resolve library
+				case Rest(arg):
+					currentCall.args.push(arg);
+				default:
+					throw "Error working through arguments...";
+			}
+		}
+
+		next();
+
+		return individualCalls;
 	}
 
 	/** Entry point **/
