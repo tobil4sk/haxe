@@ -28,11 +28,11 @@ find_path(HASHLINK_INCLUDE_DIR
 	HINTS $ENV{HASHLINK}/src
 )
 find_path(HASHLINK_LIBRARY_DIR
-	hl.lib
+	NAMES hl.lib libhl.so
 	HINTS $ENV{HASHLINK}
 )
 # find_library(HASHLINK_LIBRARIES hl)
-set(HASHLINK_LIBRARIES hl libhl CACHE STRING "Libraries to include in compilation")
+set(HASHLINK_LIBRARIES hl libhl ssl fmt CACHE STRING "Libraries to include in compilation")
 
 message(STATUS "HAXE_COMPILER: ${HAXE_COMPILER}")
 message(STATUS "HASHLINK_INCLUDE_DIR: ${HASHLINK_INCLUDE_DIR}")
