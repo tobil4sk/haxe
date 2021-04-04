@@ -6,6 +6,8 @@ import sys.FileSystem;
 import haxe.io.Path;
 import haxe.ds.Either;
 
+import haxelib.client.Main as Haxelib;
+
 final LOCK_FILE = "haxelib-lock.json";
 final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 final GLOBAL_LOCK_VAR = "HAXELIB_OVERRIDE_PATH";
@@ -55,7 +57,7 @@ class Resolver {
 	/** lockData from global lock file **/
 	final globalLockData:Null<LockFormat>;
 
-	final haxelibPath:Path;
+	final haxelibPath:String;
 
 	/**
 		Create a resolver instance in `dir`, optionally with an override file specified at `overridePath`.
@@ -76,13 +78,19 @@ class Resolver {
 			this.useGlobals = false;
 		}
 
-		haxelibPath = new Path(Haxelib.getRepository());
+		haxelibPath = getHaxelibPath();
 
-		for (i => j in localLockData) {
+		for (i => j in lockData) {
 			trace(i, j);
 		}
 	}
 
+	static function getHaxelibPath():String {
+		var path = Sys.getEnv("HAXELIB_LIBRARY_PATH");
+		if (path != null)
+			return path;
+		return Haxelib.findRepository();
+	}
 
 	/**
 		Return LockFormat Map containing library information. Look for `haxelib-lock.json`, then
@@ -125,11 +133,11 @@ class Resolver {
 	function loadGlobalLockFile():Null<LockFormat>{
 		// global lock file
 		final globalLockPath = locateGlobalLockFile();
-		final lockData = load(Path.join([globalLockPath, GLOBAL_LOCK_FILE]));
+		final globalLockData = load(Path.join([globalLockPath, GLOBAL_LOCK_FILE]));
 
-		if(!lockData.keys().hasNext())
+		if (!globalLockData.keys().hasNext())
 			return null;
-		return lockData;
+		return globalLockData;
 	}
 
 	/** Change environment variables in `path` to their values and return as a Path object **/

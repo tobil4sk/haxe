@@ -1,6 +1,10 @@
 package haxe;
+import sys.FileSystem;
+
 import haxe.io.Path;
 
+
+import haxelib.client.Main as Haxelib;
 class Haxe {
 
 	/** Default directory from which build commands are run (overriden for individual builds by --cwd) **/
@@ -17,23 +21,50 @@ class Haxe {
 		this.dir = dir;
 	}
 
-	/** Run lib-setup, part of haxelib **/
+	/** Run lib-setup **/
 	public function libSetup(args:Array<String>){
-		trace(args, args.length);
 
-		final path = switch (args.length){
+		var path = switch (args.length){
 		case 0: "";
 		case 1: args[0];
 		case _: throw new Error.ArgsError('lib-setup expects a maximum of one argument');
 		}
 
-		trace(path);
+		var rep = try Haxelib.getGlobalRepositoryPath() catch (_:Dynamic) null;
 
-		Haxelib.setup(path);
+		if (path == "") {
+			if (rep == null)
+				rep = Haxelib.getSuggestedGlobalRepositoryPath();
+			Sys.println("Please enter haxelib repository path with write access");
+			Sys.println("Hit enter for default (" + rep + ")");
+
+			Sys.print("Path : ");
+			path = Sys.stdin().readLine();
+		}
+
+		if (path != "") {
+			var splitLine = path.split("/");
+			if (splitLine[0] == "~") {
+				var home = Haxelib.getHomePath();
+
+				for (i in 1...splitLine.length) {
+					home += "/" + splitLine[i];
+				}
+				path = home;
+			}
+
+			rep = path;
+		}
+
+		rep = try FileSystem.absolutePath(rep) catch (e:Dynamic) rep;
+
+		Haxelib.saveSetup(rep);
+
+		Sys.println("haxelib repository is now " + rep);
 	}
 
 	/**
-		Run a haxe building command with `args` as arguments with which to run it.
+		Run a haxe building command with `argsArray` as array of arguments with which to run it.
 	**/
 	public function build(argsArray:Array<String>):Void {
 		final args = new Args(argsArray);
@@ -86,7 +117,8 @@ class Haxe {
 
 		try {
 			if (args[0] == "lib-setup") {
-				process.libSetup(args.slice(1));
+				args.shift();
+				process.libSetup(args);
 			} else {
 				process.build(args);
 			}
