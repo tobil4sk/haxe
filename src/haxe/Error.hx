@@ -46,6 +46,7 @@ class IncompleteOptionError extends ArgsError {
 
 }
 
+class BuildError extends Error {}
 
 function warn(warning:String) {
 	Sys.println('Warning: ${warning}');
