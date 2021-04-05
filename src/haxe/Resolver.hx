@@ -4,7 +4,6 @@ import haxe.Error.LibraryVersionMissing;
 import haxe.Error.LibraryMissing;
 import sys.FileSystem;
 import haxe.io.Path;
-import haxe.ds.Either;
 
 import haxelib.client.Main as Haxelib;
 
@@ -12,13 +11,24 @@ final LOCK_FILE = "haxelib-lock.json";
 final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 final GLOBAL_LOCK_VAR = "HAXELIB_OVERRIDE_PATH";
 
-typedef Lib = {
-	var version:String;
-	var path:String;
-	var dependencies:Either<Array<String>, LockFormat>;
+private typedef LibRaw = {path:String, version:String, ?url:String, ?dependencies:Array<String>, ?ref:String}
+
+@:structInit
+private class Lib {
+	public final version:String;
+	public final path:String;
+	public final dependencies:Array<String>;
 }
 
-typedef LockFormat = Map<String, Lib>;
+@:structInit
+private class VCSLib extends Lib {
+	public final url:String;
+	public final ref:String;
+}
+
+private typedef LockFormat = Map<String, Lib>;
+
+private class PathParseError extends Error {}
 
 /**
 	Returns the path to the global lockfile
@@ -64,6 +74,7 @@ class Resolver {
 		if `useGlobals` is set to false, then ignore global override file, if it exists.
 	 **/
 	public function new(dir:String, ?overridePath:Null<String>, useGlobals = true){
+		haxelibPath = getHaxelibPath();
 
 		localLockData = loadLocalLockFiles(dir, overridePath);
 		// if lockData is empty at this point, the resolution isn't scoped.
@@ -78,10 +89,9 @@ class Resolver {
 			this.useGlobals = false;
 		}
 
-		haxelibPath = getHaxelibPath();
 
 		for (i => j in localLockData) {
-			trace(i, j);
+			trace(i, j.version, j.path);
 		}
 	}
 
@@ -90,6 +100,85 @@ class Resolver {
 		if (path != null)
 			return path;
 		return Haxelib.findRepository();
+	}
+
+	/** Change environment variables in `path` to their values and return **/
+	function getAbsolute(path:String):String {
+		var newPath = "";
+
+		var index = 0;
+
+		while (index < path.length){
+			if(path.substr(index, 2) == "${"){
+				var name = "";
+				index += 2;
+				var char = "";
+
+				do {
+					name += char;
+					char = path.charAt(index++);
+				} while (char != "}" && char != "");
+
+				if(char == "")
+					throw new PathParseError('variable \'${name}\' is not closed with a \'}\'');
+
+				var variable = getVariable(name);
+				if(variable == null)
+					throw new PathParseError('variable ${name} not found');
+
+				newPath = Path.join([newPath, variable]);
+			}
+			newPath += path.charAt(index);
+			index++;
+		}
+		trace(newPath);
+		return newPath;
+	}
+
+	function getVariable(name:String):Null<String> {
+		if (name == "haxelib")
+			return haxelibPath;
+		return Sys.getEnv(name);
+	}
+
+	function getLibDataFromRaw(lib:LibRaw):Lib {
+		final dependencies = if (lib.dependencies == null) [] else lib.dependencies;
+
+		if (["git", "hg"].contains(lib.version)) {
+			final normalized:VCSLib = {
+				path: getAbsolute(lib.path),
+				version: lib.version,
+				dependencies: dependencies,
+				url: lib.url,
+				ref: lib.ref
+			};
+			return normalized;
+		}
+		return {
+			path: getAbsolute(lib.path),
+			version: lib.version,
+			dependencies: dependencies
+		};
+	}
+
+	/**
+		Loads LockFormat map with normalized paths from path
+	**/
+	function load(path:String):LockFormat {
+		final content:DynamicAccess<LibRaw> = haxe.Json.parse(sys.io.File.getContent(path));
+
+		final lock:LockFormat = [];
+		for (name => lib in content) {
+			try {
+				lock[name] = getLibDataFromRaw(lib);
+			} catch (e:PathParseError) {
+				throw 'Could not parse path of library \'${name}\' in lockfile ${path}: \n ${e.message}';
+			} catch (e) {
+				trace(e.stack);
+				throw 'Library ${name} in lockfile ${path} has illegal fields';
+			}
+		}
+		return lock;
 	}
 
 	/**
@@ -103,12 +192,11 @@ class Resolver {
 		function loadLockFile(path:String, optional = true) {
 			if (FileSystem.exists(path)) {
 				try {
-					final content = haxe.Json.parse(sys.io.File.getContent(path));
-					final lock = load(content);
+					final lock = load(path);
 					for (lib in lock.keys())
 						localLockData[lib] = lock[lib];
 					return;
-				} catch(e:Exception){}
+				} //catch(e:Exception){}
 			}
 
 			if (!optional)
@@ -140,17 +228,10 @@ class Resolver {
 		return globalLockData;
 	}
 
-	/** Change environment variables in `path` to their values and return as a Path object **/
-	function getAbsolute(path:String):Path{
-
-
-		return new Path(path);
-	}
-
 	/** Get the path for a library, optionally with a specific version.
 		If the resolution method is scoped and the library cannot be found,
 		throws an error, otherwise resolve it using `.current` files. **/
-	public function libPath(lib:String, ?version:Null<String>):Path{
+	public function getLibPath(lib:String, ?version:Null<String>):String{
 		final checkVersion = version != null;
 		var localLibData:Null<Lib> = null;
 		var libData:Null<Lib>;
@@ -172,13 +253,13 @@ class Resolver {
 		if(libData != null)
 			// if version matches or version match not necessary
 			if(!checkVersion || (version == libData.version))
-				return getAbsolute(libData.path);
+				return libData.path;
 
 		if (scoped) {
 			// from local lock data
 			// if version matches or version match not necessary
 			if (!checkVersion || (version == localLibData.version))
-				return getAbsolute(localLibData.path);
+				return localLibData.path;
 
 		} else {
 			// resolve from haxelib .current files
@@ -186,7 +267,7 @@ class Resolver {
 		}
 
 
-		return new Path("");
+		return "";
 	}
 
 }

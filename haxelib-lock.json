@@ -1,0 +1,21 @@
+{
+	"haxec": {
+		"version": "4.2.1",
+		"path": "${HAXEPATH}/haxec/4,2,1"
+	},
+	"haxelib": {
+		"version": "git",
+		"url":"https://github.com/tobil4sk/haxelib.git",
+		"ref":"cf1ec87efab4ebbeafdd98e7521a56f8793be556",
+		"path": "${haxelib}/haxelib/git",
+		"dependencies":[
+			"hx3compat"
+		]
+	},
+	"hx3compat":{
+		"version": "git",
+		"url": "https://github.com/haxefoundation/hx3compat.git",
+		"ref": "f1f18201e5c0479cb5adf5f6028788b37f37b730",
+		"path": "${haxelib}/hx3compat/git"
+	}
+}
