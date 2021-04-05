@@ -28,16 +28,18 @@ find_path(HASHLINK_INCLUDE_DIR
 	HINTS $ENV{HASHLINK}/src
 )
 find_path(HASHLINK_LIBRARY_DIR
-	NAMES hl.lib libhl.so
+	NAMES libhl.lib libhl.so
 	HINTS $ENV{HASHLINK}
 )
-# find_library(HASHLINK_LIBRARIES hl)
-set(HASHLINK_LIBRARIES hl libhl ssl fmt CACHE STRING "Libraries to include in compilation")
+find_library(HASHLINK_LIBRARIES libhl)
+find_library(SSL ssl)
+find_library(FMT fmt)
+# set(HASHLINK_LIBRARIES libhl ssl fmt CACHE STRING "Libraries to include in compilation")
 
 message(STATUS "HAXE_COMPILER: ${HAXE_COMPILER}")
 message(STATUS "HASHLINK_INCLUDE_DIR: ${HASHLINK_INCLUDE_DIR}")
 message(STATUS "HASHLINK_LIBRARY_DIR: ${HASHLINK_LIBRARY_DIR}")
-message(STATUS "HASHLINK_LIBRARIES: ${HASHLINK_LIBRARIES}")
+message(STATUS "HASHLINK_LIBRARIES: ${HASHLINK_LIBRARIES} ${SSL} ${FMT}")
 
 include_directories(${HASHLINK_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/bin/hlc/)
 link_directories(${HASHLINK_LIBRARY_DIR})
@@ -57,4 +59,4 @@ add_executable(haxe
     ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
 )
 
-target_link_libraries(haxe ${HASHLINK_LIBRARIES})
+target_link_libraries(haxe ${HASHLINK_LIBRARIES} ${SSL} ${FMT})
