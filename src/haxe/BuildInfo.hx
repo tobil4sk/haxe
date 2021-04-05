@@ -1,7 +1,5 @@
 package haxe;
 
-import haxe.io.Path;
-
 import haxe.Args;
 
 typedef BuildInfo = {
@@ -12,7 +10,7 @@ typedef BuildInfo = {
 
 function generateBuildInfo(dir:String, args:Args):BuildInfo {
 	// work out build directory
-	final buildDir = getBuildDirectory(dir, args.specialArgs.get("cwd"));
+	final buildDir = getBuildDirectory(args.specialArgs.get("cwd"), dir);
 
 	// get the absolute path for the override path, if specified.
 	final overridePath = getLockFilePath(args.specialArgs.get("lock-file"), buildDir);
@@ -31,21 +29,18 @@ function generateBuildInfo(dir:String, args:Args):BuildInfo {
 	};
 }
 
-private function getBuildDirectory(dir:String, cwdArg:Null<String>):String {
+private function getBuildDirectory(cwdArg:Null<String>, dir:String):String {
 	if (cwdArg == null)
 		return dir;
 
-	if (Path.isAbsolute(cwdArg))
-		return cwdArg;
-
-	return Path.join([dir, cwdArg]);
+	return Utils.joinUnlessAbsolute(dir, cwdArg);
 }
 
 private function getLockFilePath(overridePath:Null<String>, buildDir:String):String {
-	if (overridePath == null || Path.isAbsolute(overridePath))
+	if (overridePath == null)
 		return overridePath;
 
-	return Path.join([buildDir, overridePath]);
+	return Utils.joinUnlessAbsolute(buildDir, overridePath);
 }
 
 

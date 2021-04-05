@@ -46,8 +46,9 @@ private final PAIR_ARGS = [
 ];
 
 
-/** Work out what types of arguments are in the array `args` and separate them accordingly. Parse .hxml files and sort their arguments recursively **/
-function parse(args:Array<String>):Args {
+/** Work out what types of arguments are in the array `args` and separate them accordingly. `dir` is where to begin searching for .hxmls.
+	Parse .hxml files and sort their arguments recursively **/
+function parse(dir:String, args:Array<String>):Args {
 	/** priority arguments that need to be retrievable at the beginning **/
 	final specialArgs:Map<String, Null<String>> = [];
 
@@ -59,7 +60,11 @@ function parse(args:Array<String>):Args {
 		current = args[0];
 		switch (getArgType(current)) {
 			case USpecialArg(arg):
-				specialArgs[arg] = args.splice(0, 2).pop();
+				final value = specialArgs[arg] = args.splice(0, 2).pop();
+
+				// update dir if it is cwd, as hxmls need to be looked for there
+				if (arg == "cwd")
+					dir = value;
 
 			case USingleArg(arg):
 				args.splice(0, 1);
@@ -79,7 +84,10 @@ function parse(args:Array<String>):Args {
 				argsArray.push(Rest(arg));
 
 			case UHxml(file):
-				final out = HXML.fromHXML(file);
+				//
+				final path = Utils.joinUnlessAbsolute(dir, file);
+
+				final out = HXML.fromHXML(path);
 				args.shift();
 
 				// add all the extracted arguments to the list
@@ -95,6 +103,7 @@ function parse(args:Array<String>):Args {
 		mainArgs: argsArray.iterator()
 	};
 }
+
 
 /** Evaluates the type of an argument and returns it as an enum **/
 private function getArgType(arg:String): UnparsedArgType {

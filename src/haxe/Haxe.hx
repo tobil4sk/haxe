@@ -72,7 +72,7 @@ class Haxe {
 		Run a haxe building command with `argsArray` as array of arguments with which to run it.
 	**/
 	public function build(argsArray:Array<String>):Void {
-		final args = Args.parse(argsArray);
+		final args = Args.parse(dir, argsArray);
 
 		// process arguments
 		final buildInfo = BuildInfo.generateBuildInfo(dir, args);
