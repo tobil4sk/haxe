@@ -1,22 +1,14 @@
 package haxe;
-import sys.io.Process;
+
 import sys.FileSystem;
 
-import haxe.io.Path;
-
 import haxe.Error.BuildError;
-import haxe.Args;
 import haxe.Args.ArgType;
 
 import haxe.BuildCall;
 
 import haxelib.client.Main as Haxelib;
 
-typedef BuildInfo = {
-	buildDir:String,
-	haxecPath:String,
-	builds:Array<BuildCall>
-}
 
 class Haxe {
 
@@ -83,9 +75,11 @@ class Haxe {
 		final args = Args.parse(argsArray);
 
 		// process arguments
-		final buildInfo = generateBuildInfo(args);
+		final buildInfo = BuildInfo.generateBuildInfo(dir, args);
 
 		// temporary solution, would be better to avoid Sys.setCwd()
+		final tmp = Sys.getCwd();
+
 		Sys.setCwd(buildInfo.buildDir);
 
 		// make calls
@@ -94,96 +88,14 @@ class Haxe {
 		}
 
 		// back to default directory
-		Sys.setCwd(dir);
-	}
-
-	function generateBuildInfo(args:ArgsInfo):BuildInfo {
-		// work out build directory
-		final buildDir = getBuildDirectory(args.specialArgs.get("cwd"));
-
-		// get the absolute path for the override path, if specified.
-		final overridePath = getLockFilePath(args.specialArgs.get("lock-file"), buildDir);
-
-		// start library resolver
-		final resolver = new Resolver(buildDir, overridePath);
-
-		var haxecPath = "";
-
-		final individualCalls = generateBuildCalls(args.mainArgs, resolver);
-
-		return {
-			buildDir : buildDir,
-			builds : individualCalls,
-			haxecPath : haxecPath
-		};
-	}
-
-	function getBuildDirectory(cwdArg:Null<String>):String {
-		if (cwdArg == null)
-			return dir;
-
-		if (Path.isAbsolute(cwdArg))
-			return cwdArg;
-
-		return Path.join([dir, cwdArg]);
-	}
-
-	function getLockFilePath(overridePath:Null<String>, buildDir:String):String {
-		if (overridePath == null || Path.isAbsolute(overridePath))
-			return overridePath;
-
-		return Path.join([buildDir, overridePath]);
+		Sys.setCwd(tmp);
 	}
 
 
-	function generateBuildCalls(args:haxe.iterators.ArrayIterator<ArgType>, resolver:Resolver){
-		// separate arrays of arguments for individual calls, if --each and --next are used
-		final individualCalls:Array<BuildCall> = [];
 
-		// arguments for every call
-		var eachCall:BuildCall = BuildCall.createEmpty();
-		// current call, a "buffer" whose contents can be moved to each or individual calls
-		var currentCall:BuildCall = BuildCall.createEmpty();
+	/** Print help information to console **/
+	function help():Void{
 
-		function next() {
-			final newCall = BuildCall.combine(eachCall, currentCall);
-			individualCalls.push(newCall);
-			currentCall.reset();
-		}
-
-		final map = [
-			SingleArg("each") => function(){
-				eachCall = currentCall.copy();
-				currentCall.reset();
-			},
-			SingleArg("next") => next,
-			SingleArg("help") => function(){
-				currentCall.help = true;
-			},
-			SingleArg("version") => function() {
-				currentCall.version = true;
-			}
-		];
-
-		for (arg in args) {
-			switch (arg) {
-				case arg if (map.exists(arg)):
-					map[arg]();
-				case PairArg("library", name):
-					final libPath = resolver.libPath(name);
-
-
-				// resolve library
-				case Rest(arg):
-					currentCall.args.push(arg);
-				default:
-					throw "Error working through arguments...";
-			}
-		}
-
-		next();
-
-		return individualCalls;
 	}
 
 	/** Entry point **/
@@ -203,6 +115,8 @@ class Haxe {
 			if (args[0] == "lib-setup") {
 				args.shift();
 				process.libSetup(args);
+			} else if(args.length == 0){
+				process.help();
 			} else {
 				process.build(args);
 			}
