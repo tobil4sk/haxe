@@ -1,13 +1,12 @@
 package haxe;
 
-
-import haxe.Exception;
-
 class Error extends Exception {
-
+	public function log() {
+		Sys.println("Error: " + message);
+	}
 }
 
-class LibraryMissing extends Exception {
+class LibraryMissing extends Error {
 	public function new(lib:String, scoped=true) {
 		var errorString = 'Library ${lib} not installed in current scope : run \'haxelib install ${lib}\'';
 
@@ -18,7 +17,7 @@ class LibraryMissing extends Exception {
 	}
 }
 
-class LibraryVersionMissing extends Exception {
+class LibraryVersionMissing extends Error {
 	public function new(lib:String, version:String, scoped = true) {
 		var errorString = 'Library ${lib} version ${version} not installed in current scope';
 
@@ -50,9 +49,4 @@ class BuildError extends Error {}
 
 function warn(warning:String) {
 	Sys.println('Warning: ${warning}');
-}
-
-
-function log(e:Error){
-	Sys.println("Error: "+ e.message);
 }

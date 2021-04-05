@@ -121,7 +121,7 @@ class Haxe {
 				process.build(args);
 			}
 		} catch (e:Error) {
-			Error.log(e);
+			e.log();
 		}
 	}
 }
