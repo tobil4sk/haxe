@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.16.3)
 
 include(GNUInstallDirs)
 project(Haxe C)
@@ -23,26 +23,40 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 find_program(HAXE_COMPILER haxe)
 
-find_path(HASHLINK_INCLUDE_DIR
+find_path(HL_INCLUDE_DIR
 	hlc.h
 	HINTS $ENV{HASHLINK}/src
 )
-find_path(HASHLINK_LIBRARY_DIR
-	NAMES libhl.lib libhl.so
-	HINTS $ENV{HASHLINK}
+find_path(HL_LIBRARY_DIR
+    NAMES libhl.lib libhl.so
+    HINTS $ENV{HASHLINK} /usr/local/lib
 )
-find_library(HASHLINK_LIBRARIES libhl)
-find_library(SSL ssl)
-find_library(FMT fmt)
-# set(HASHLINK_LIBRARIES libhl ssl fmt CACHE STRING "Libraries to include in compilation")
+
+# locate hashlink libraries
+
+if(WIN32)
+	find_library(HL_LIBRARY libhl)
+	set(LIB_EXT lib)
+else()
+	find_library(HL_LIBRARY hl)
+	set(LIB_EXT hdll)
+endif()
+
+foreach(LIB ssl fmt)
+    list(APPEND HL_EXTRA_LIBRARIES ${HL_LIBRARY_DIR}/${LIB}.${LIB_EXT})
+endforeach()
+
+set(HL_EXTRA_LIBRARIES ${HL_EXTRA_LIBRARIES} CACHE STRING "Libraries to include in compilation")
+
+# show variable values
 
 message(STATUS "HAXE_COMPILER: ${HAXE_COMPILER}")
-message(STATUS "HASHLINK_INCLUDE_DIR: ${HASHLINK_INCLUDE_DIR}")
-message(STATUS "HASHLINK_LIBRARY_DIR: ${HASHLINK_LIBRARY_DIR}")
-message(STATUS "HASHLINK_LIBRARIES: ${HASHLINK_LIBRARIES} ${SSL} ${FMT}")
+message(STATUS "HL_INCLUDE_DIR: ${HL_INCLUDE_DIR}")
+message(STATUS "HL_LIBRARY_DIR: ${HL_LIBRARY_DIR}")
+message(STATUS "HL_LIBRARY: ${HL_LIBRARY}")
+message(STATUS "HL_EXTRA_LIBRARIES: ${HL_EXTRA_LIBRARIES}")
 
-include_directories(${HASHLINK_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/bin/hlc/)
-link_directories(${HASHLINK_LIBRARY_DIR})
+# building commands
 
 add_custom_command(
 	OUTPUT ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
@@ -59,4 +73,5 @@ add_executable(haxe
     ${CMAKE_SOURCE_DIR}/bin/hlc/main.c
 )
 
-target_link_libraries(haxe ${HASHLINK_LIBRARIES} ${SSL} ${FMT})
+target_include_directories(haxe PRIVATE ${HL_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/bin/hlc/)
+target_link_libraries(haxe ${HL_LIBRARY} ${HL_EXTRA_LIBRARIES})
