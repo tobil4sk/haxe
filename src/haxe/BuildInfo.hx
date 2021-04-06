@@ -78,13 +78,15 @@ private function generateBuildCalls(args:haxe.iterators.ArrayIterator<ArgType>, 
 			case arg if (map.exists(arg)):
 				map[arg]();
 				trace(arg);
-			case PairArg("library", name):
-				final libPath = resolver.libPath(name);
+			case PairArg("library", flag):
+
+				final libInfo = LibFlagInfo.extract(flag);
+				currentCall.addLib(libInfo);
 
 
 			// resolve library
 			case Rest(arg):
-				currentCall.args.push(arg);
+				currentCall.addArg(arg);
 			default:
 				throw "Error working through arguments...";
 		}

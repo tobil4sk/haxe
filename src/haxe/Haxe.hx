@@ -2,11 +2,6 @@ package haxe;
 
 import sys.FileSystem;
 
-import haxe.Error.BuildError;
-import haxe.Args.ArgType;
-
-import haxe.BuildCall;
-
 import haxelib.client.Main as Haxelib;
 
 
@@ -84,7 +79,7 @@ class Haxe {
 
 		// make calls
 		for (build in buildInfo.builds) {
-			Sys.command(buildInfo.haxecPath, build.args);
+			Sys.command(buildInfo.haxecPath, build.getArgs());
 		}
 
 		// back to default directory

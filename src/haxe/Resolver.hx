@@ -11,8 +11,10 @@ final LOCK_FILE = "haxelib-lock.json";
 final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
 final GLOBAL_LOCK_VAR = "HAXELIB_OVERRIDE_PATH";
 
+/** Structure of a library taken out of a lock file **/
 private typedef LibRaw = {path:String, version:String, ?url:String, ?dependencies:Array<String>, ?ref:String}
 
+/** Information on a specific library loaded from lock file **/
 @:structInit
 private class Lib {
 	public final version:String;
@@ -20,12 +22,14 @@ private class Lib {
 	public final dependencies:Array<String>;
 }
 
+/** Information on a git or hg library **/
 @:structInit
 private class VCSLib extends Lib {
 	public final url:String;
 	public final ref:String;
 }
 
+/** Map that stores libraries and their information **/
 private typedef LockFormat = Map<String, Lib>;
 
 private class PathParseError extends Error {}
@@ -43,6 +47,10 @@ function locateGlobalLockFile():String {
 		globalLockPath = home;
 	}
 	return globalLockPath;
+}
+
+function isVCS(version:String):Bool {
+	return version == "git" || version == "hg";
 }
 
 /**
@@ -144,7 +152,7 @@ class Resolver {
 	function getLibDataFromRaw(lib:LibRaw):Lib {
 		final dependencies = if (lib.dependencies == null) [] else lib.dependencies;
 
-		if (["git", "hg"].contains(lib.version)) {
+		if (isVCS(lib.version)) {
 			final normalized:VCSLib = {
 				path: getAbsolute(lib.path),
 				version: lib.version,
