@@ -45,6 +45,11 @@ private final PAIR_ARGS = [
 	"library" => ["L", "lib"]
 ];
 
+class IncompleteOptionError extends Error.ArgsError {
+	public function new(arg:String) {
+		super('option \'${arg}\' needs an argument');
+	}
+}
 
 /** Work out what types of arguments are in the array `args` and separate them accordingly. `dir` is where to begin searching for .hxmls.
 	Parse .hxml files and sort their arguments recursively **/
@@ -57,30 +62,30 @@ function parse(dir:String, args:Array<String>):Args {
 
 	var current:String;
 	while (args.length > 0) {
-		current = args[0];
+		current = args.shift();
 		switch (getArgType(current)) {
 			case USpecialArg(arg):
-				final value = specialArgs[arg] = args.splice(0, 2).pop();
+				if (args.length == 0)
+					throw new IncompleteOptionError(arg);
+
+				final value = specialArgs[arg] = args.shift();
 
 				// update dir if it is cwd, as hxmls need to be looked for there
 				if (arg == "cwd")
 					dir = value;
 
 			case USingleArg(arg):
-				args.splice(0, 1);
+				args.shift();
 				argsArray.push(SingleArg(arg));
 
 			case UPairArg(arg):
 				trace(args.length, arg);
-				if (args.length == 1) {
-					args.shift();
-					argsArray.push(PairArg(arg, ""));
-				} else
-					argsArray.push(PairArg(arg, args.splice(0, 2).pop()));
+				if (args.length == 0)
+					throw new IncompleteOptionError(arg);
+
+				argsArray.push(PairArg(arg, args.shift()));
 
 			case URest(arg):
-				args.splice(0, 1);
-
 				argsArray.push(Rest(arg));
 
 			case UHxml(file):
@@ -88,7 +93,6 @@ function parse(dir:String, args:Array<String>):Args {
 				final path = Utils.joinUnlessAbsolute(dir, file);
 
 				final out = HXML.fromHXML(path);
-				args.shift();
 
 				// add all the extracted arguments to the list
 				while (out.length > 0)
@@ -102,6 +106,28 @@ function parse(dir:String, args:Array<String>):Args {
 		specialArgs: specialArgs,
 		mainArgs: argsArray.iterator()
 	};
+}
+
+/** Parse an extraParams.hxml file. Throw an error if an illegal argument is found **/
+function parseLibArgs(path:String):Array<String> {
+	final args = HXML.fromHXML(path);
+
+	final argsArray = [];
+	var current:String;
+	while (args.length > 0) {
+		current = args.shift();
+		switch (getArgType(current)) {
+			case URest(arg):
+				argsArray.push(arg);
+			case UPairArg("library"):
+				Error.warn('file ${path} contains argument \'${current}\', which is not necessary in extraParams.hxml files');
+				args.shift();
+			case _:
+				Error.warn('file ${path} contains argument \'${current}\', which is not allowed in extraParams.hxml files');
+		}
+	}
+
+	return argsArray;
 }
 
 

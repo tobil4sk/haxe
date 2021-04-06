@@ -14,14 +14,6 @@ class FileError extends Error {
 
 class ArgsError extends Error {}
 
-class IncompleteOptionError extends ArgsError {
-
-	public function new(arg:String){
-		super('option \'${arg}\' needs an argument');
-	}
-
-}
-
 class BuildError extends Error {}
 
 function warn(warning:String) {
