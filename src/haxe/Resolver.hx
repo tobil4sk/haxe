@@ -1,7 +1,5 @@
 package haxe;
 
-import haxe.Error.LibraryVersionMissing;
-import haxe.Error.LibraryMissing;
 import sys.FileSystem;
 import haxe.io.Path;
 
@@ -33,6 +31,28 @@ private class VCSLib extends Lib {
 private typedef LockFormat = Map<String, Lib>;
 
 private class PathParseError extends Error {}
+
+private class LibraryMissing extends Error {
+	public function new(lib:String, scoped = true) {
+		var errorString = 'Library ${lib} not installed in current scope : run \'haxelib install ${lib}\'';
+
+		if (!scoped)
+			errorString = 'Library ${lib} not installed : run \'haxelib install ${lib}\'';
+
+		super(errorString);
+	}
+}
+
+private class LibraryVersionMissing extends Error {
+	public function new(lib:String, version:String, scoped = true) {
+		var errorString = 'Library ${lib} version ${version} not installed in current scope';
+
+		if (!scoped)
+			errorString = 'Library ${lib} version ${version} not installed';
+
+		super(errorString);
+	}
+}
 
 /**
 	Returns the path to the global lockfile
