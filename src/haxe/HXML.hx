@@ -47,17 +47,15 @@ function fromHXML(path:String):Array<String>{
 private function splitLines(content:String):Array<String>{
 	final lines = [];
 
-
-	final match = ~/[\r\n]+/;
 	final matches = ["\r", "\n"];
 
 	var index = 0;
 	var line:StringBuf;
-	var space:String;
+
 	while (index < content.length) {
 		line = new StringBuf();
-		// get line content until newline reached
-		while(!matches.contains(content.charAt(index))){
+		// get line content until newline reached or end of string
+		while(!matches.contains(content.charAt(index)) && content.charAt(index) != ""){
 			line.add(content.charAt(index++));
 		}
 		// wait for white spaces to end
