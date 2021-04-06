@@ -1,0 +1,5 @@
+-cp src
+-D analyzer-optimize
+--interp
+--main haxe.Haxe
+-lib haxelib

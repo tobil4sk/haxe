@@ -5,6 +5,17 @@
 			"name": "Haxe Interpreter",
 			"type": "haxe-eval",
 			"request": "launch"
+		},
+		{
+			"name":"Hashlink",
+			"type":"hl",
+			"request":"launch",
+			"program": "main.hl",
+			"preLaunchTask": "haxe: hldebug.hxml",
+			"cwd":"${workspaceFolder}/bin/hl",
+			"args": [
+				"C:\\Dev\\Haxe\\tests\\test\\build.hxml"
+			]
 		}
 	]
 }
