@@ -2,7 +2,8 @@ package haxe;
 
 import sys.FileSystem;
 
-import haxelib.client.Main as Haxelib;
+import haxelib.client.RepoManager;
+import haxelib.client.FsUtils;
 
 
 class Haxe {
@@ -30,11 +31,11 @@ class Haxe {
 		case _: throw new Error.ArgsError('lib-setup expects a maximum of one argument');
 		}
 
-		var rep = try Haxelib.getGlobalRepositoryPath() catch (_:Dynamic) null;
+		var rep = try RepoManager.getGlobalRepositoryPath() catch (_:Dynamic) null;
 
 		if (path == "") {
 			if (rep == null)
-				rep = Haxelib.getSuggestedGlobalRepositoryPath();
+				rep = RepoManager.getSuggestedGlobalRepositoryPath();
 			Sys.println("Please enter haxelib repository path with write access");
 			Sys.println("Hit enter for default (" + rep + ")");
 
@@ -45,7 +46,7 @@ class Haxe {
 		if (path != "") {
 			var splitLine = path.split("/");
 			if (splitLine[0] == "~") {
-				var home = Haxelib.getHomePath();
+				var home = FsUtils.getHomePath();
 
 				for (i in 1...splitLine.length) {
 					home += "/" + splitLine[i];
@@ -58,7 +59,7 @@ class Haxe {
 
 		rep = try FileSystem.absolutePath(rep) catch (e:Dynamic) rep;
 
-		Haxelib.saveSetup(rep);
+		RepoManager.saveSetup(rep);
 
 		Sys.println("haxelib repository is now " + rep);
 	}

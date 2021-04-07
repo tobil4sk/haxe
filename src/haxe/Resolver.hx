@@ -3,7 +3,7 @@ package haxe;
 import sys.FileSystem;
 import haxe.io.Path;
 
-import haxelib.client.Main as Haxelib;
+import haxelib.client.RepoManager;
 
 final LOCK_FILE = "haxelib-lock.json";
 final GLOBAL_LOCK_FILE = "haxelib-global-lock.json";
@@ -127,7 +127,7 @@ class Resolver {
 		var path = Sys.getEnv("HAXELIB_LIBRARY_PATH");
 		if (path != null)
 			return path;
-		return Haxelib.findRepository();
+		return RepoManager.findRepository();
 	}
 
 	/** Change environment variables in `path` to their values and return **/

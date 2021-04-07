@@ -3,4 +3,4 @@
 --hl bin/hlc/main.c
 --main haxe.Haxe
 #-D hlgen.makefile=vs2019
--lib haxelib:git:https://github.com/tobil4sk/haxelib.git#cf1ec87efab4ebbeafdd98e7521a56f8793be556
+-lib haxelib:git:https://github.com/tobil4sk/haxelib.git#6fe2b7b9577da3d2d64433b2730e13f0b3b8799d
