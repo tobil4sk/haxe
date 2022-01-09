@@ -17,5 +17,5 @@ class ArgsError extends Error {}
 class BuildError extends Error {}
 
 function warn(warning:String) {
-	Sys.println('Warning: ${warning}');
+	Sys.println('Warning: $warning');
 }

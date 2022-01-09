@@ -1,5 +1,7 @@
 package haxe;
 
+import sys.io.File;
+
 import haxe.iterators.ArrayIterator;
 
 enum ArgType {
@@ -51,8 +53,15 @@ class IncompleteOptionError extends Error.ArgsError {
 	}
 }
 
-/** Work out what types of arguments are in the array `args` and separate them accordingly. `dir` is where to begin searching for .hxmls.
-	Parse .hxml files and sort their arguments recursively **/
+/**
+	Create an Args object from the array `args`.
+
+	`dir` is where to begin searching for .hxmls,
+	but --cwd arguments will override it.
+
+	Parse .hxml files and sort their arguments recursively
+
+**/
 function parse(dir:String, args:Array<String>):Args {
 	/** priority arguments that need to be retrievable at the beginning **/
 	final specialArgs:Map<String, Null<String>> = [];
@@ -89,11 +98,9 @@ function parse(dir:String, args:Array<String>):Args {
 				argsArray.push(Rest(arg));
 
 			case UHxml(file):
-				//
 				final path = Utils.joinUnlessAbsolute(dir, file);
 
-				final out = HXML.fromHXML(path);
-
+				final out = getArgsFromHxml(path);
 				// add all the extracted arguments to the list
 				while (out.length > 0)
 					args.unshift(out.pop());
@@ -110,7 +117,7 @@ function parse(dir:String, args:Array<String>):Args {
 
 /** Parse an extraParams.hxml file. Throw an error if an illegal argument is found **/
 function parseLibArgs(path:String):Array<String> {
-	final args = HXML.fromHXML(path);
+	final args = HXML.parseHXML(path);
 
 	final argsArray = [];
 	var current:String;
@@ -130,6 +137,15 @@ function parseLibArgs(path:String):Array<String> {
 	return argsArray;
 }
 
+private function getArgsFromHxml(path:String):Array<String> {
+	final content =
+		try
+			File.getContent(path)
+		catch (e:Exception)
+			throw new Error.FileError(path);
+
+	return HXML.parseHXML(content);
+}
 
 /** Evaluates the type of an argument and returns it as an enum **/
 private function getArgType(arg:String): UnparsedArgType {

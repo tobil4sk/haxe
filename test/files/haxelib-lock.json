@@ -1,0 +1,16 @@
+{
+	"libname":{
+		"version": "1.1.1",
+		"path": "${haxelib}/libname/1,1,1"
+	},
+	"gitlib": {
+		"version": "1.1.1",
+		"path": "${haxelib}/gitlib/git",
+		"vcs": {
+			"type": "git",
+			"url": "correct:url",
+			"branch": "branch",
+			"ref": "ref"
+		}
+	}
+}

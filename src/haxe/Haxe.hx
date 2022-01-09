@@ -68,23 +68,34 @@ class Haxe {
 		Run a haxe building command with `argsArray` as array of arguments with which to run it.
 	**/
 	public function build(argsArray:Array<String>):Void {
+		// temporary solution, would be better to avoid Sys.setCwd()
+		final oldDir = Sys.getCwd();
+		Sys.setCwd(dir);
+
 		final args = Args.parse(dir, argsArray);
+		if (args.specialArgs.exists("help")) {
+			return;
+		}
+
+		final buildDir = {
+			final cwd = args.specialArgs.get("cwd");
+			if (cwd != null) {
+				Sys.setCwd(cwd);
+				cwd;
+			}
+			dir;
+		};
 
 		// process arguments
-		final buildInfo = BuildInfo.generateBuildInfo(dir, args);
-
-		// temporary solution, would be better to avoid Sys.setCwd()
-		final tmp = Sys.getCwd();
-
-		Sys.setCwd(buildInfo.buildDir);
+		final buildInfo = BuildInfo.generateBuildInfo(buildDir, args);
 
 		// make calls
 		for (build in buildInfo.builds) {
 			Sys.command(buildInfo.haxecPath, build.getArgs());
 		}
 
-		// back to default directory
-		Sys.setCwd(tmp);
+		// back to old directory
+		Sys.setCwd(oldDir);
 	}
 
 

@@ -82,4 +82,8 @@ class BuildCall {
 		// if everything is alright and it isn't already present then add it
 		libs[info.name] = info;
 	}
+
+	public function hasLib(name:String):Bool {
+		return libs.exists(name);
+	}
 }

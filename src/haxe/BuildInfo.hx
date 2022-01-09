@@ -3,46 +3,29 @@ package haxe;
 import haxe.Args;
 
 typedef BuildInfo = {
-	buildDir:String,
 	haxecPath:String,
 	builds:Array<BuildCall>
 }
 
+/**
+	Generate information for building in `dir` with `args`
+**/
 function generateBuildInfo(dir:String, args:Args):BuildInfo {
-	// work out build directory
-	final buildDir = getBuildDirectory(args.specialArgs.get("cwd"), dir);
-
 	// get the absolute path for the override path, if specified.
-	final overridePath = getLockFilePath(args.specialArgs.get("lock-file"), buildDir);
+	final overridePath = args.specialArgs.get("lock-file");
 
 	// start library resolver
-	final resolver = new Resolver(buildDir, overridePath);
+	final resolver = Resolver.create(overridePath);
 
 	final haxecPath = "haxec";
 
 	final individualCalls = generateBuildCalls(args.mainArgs, resolver);
 
 	return {
-		buildDir : buildDir,
 		builds : individualCalls,
 		haxecPath : haxecPath
 	};
 }
-
-private function getBuildDirectory(cwdArg:Null<String>, dir:String):String {
-	if (cwdArg == null)
-		return dir;
-
-	return Utils.joinUnlessAbsolute(dir, cwdArg);
-}
-
-private function getLockFilePath(overridePath:Null<String>, buildDir:String):String {
-	if (overridePath == null)
-		return overridePath;
-
-	return Utils.joinUnlessAbsolute(buildDir, overridePath);
-}
-
 
 private function generateBuildCalls(args:haxe.iterators.ArrayIterator<ArgType>, resolver:Resolver):Array<BuildCall> {
 	// separate arrays of arguments for individual calls, if --each and --next are used
@@ -81,8 +64,14 @@ private function generateBuildCalls(args:haxe.iterators.ArrayIterator<ArgType>, 
 			case PairArg("library", flag):
 
 				final libInfo = LibFlagInfo.extract(flag);
-				currentCall.addLib(libInfo);
 
+				//final libArgs = resolver.getArgsFromFlag(libInfo);
+
+				//for (libArg in libArgs) {
+				//	currentCall.addArg(libArg);
+				//}
+
+				currentCall.addLib(libInfo);
 
 			// resolve library
 			case Rest(arg):

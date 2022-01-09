@@ -1,0 +1,10 @@
+-cp src
+-cp test
+
+--main HaxeTests
+--interp
+
+-lib haxelib
+-lib utest
+
+-D UTEST-PRINT-TESTS
